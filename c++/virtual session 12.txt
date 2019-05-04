@@ -1,0 +1,58 @@
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+
+double f (double a)
+{
+	return a * a;
+}
+
+class NIntegrate // for numerical integration
+{
+	public :
+		
+		double integrate (const std::vector<double> & grid) const
+		{
+			double integral = 0.0;
+			for (std::vector<double>::size_type i = 1u; i != grid.size(); ++i)
+				integral += segment(grid.at(i - 1u), grid.at(i));
+			return integral;
+		}
+
+	private :
+		
+		// Default use Trapezoid rule
+		virtual double segment (double a, double b) const
+		{
+			return 0.5 * (b - a) * (f(a) + f(b));
+		}
+};
+
+class NIntegrateSimpson : public NIntegrate // Simpson's Rule
+{
+	public :
+		double segment (double a, double b) const override
+		{
+			return (b - a) * (f(a) + 4.0 * f(0.5 * (a + b)) + f(b)) / 6.0;
+		}
+};
+
+void integrate_and_print(const NIntegrate & quadrature)
+{
+	std::vector<double> grid(2u);
+	grid.at(0u) = 0.0; grid.at(1u) = 1.0;
+	
+	std::cout << quadrature.integrate(grid) << std::endl;
+}
+
+
+int main()
+{
+	NIntegrate trapezoidObj;
+	NIntegrateSimpson simpsonObj;
+	
+	integrate_and_print(trapezoidObj);
+	integrate_and_print(simpsonObj);
+	
+	return EXIT_SUCCESS;
+}
